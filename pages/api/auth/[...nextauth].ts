@@ -13,7 +13,7 @@ import prisma from "@/lib/prisma";
 import { CreateUserEmailProps, CustomUser } from "@/lib/types";
 import { generateChecksum } from "@/lib/utils/generate-checksum";
 
-const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+const VERCEL_DEPLOYMENT = (!!process.env.VERCEL_URL || !!process.env.PAPERMARK_DOMAIN);
 
 // This function can run for a maximum of 180 seconds
 export const config = {
@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
-        domain: VERCEL_DEPLOYMENT ? ".papermark.io" : undefined,
+        //domain: VERCEL_DEPLOYMENT ? process.env.PAPERMARK_DOMAIN || ".papermark.io" : undefined,
         secure: VERCEL_DEPLOYMENT,
       },
     },
