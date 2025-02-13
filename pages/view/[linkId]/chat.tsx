@@ -20,14 +20,14 @@ export const getServerSideProps = async (context: any) => {
   const { linkId } = context.params;
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (!session) {
+  /*if (!session) {
     return {
       redirect: {
         permanent: false,
         destination: `/login?next=/view/${linkId}/chat`,
       },
     };
-  }
+  }*/
 
   const link = await prisma.link.findUnique({
     where: { id: linkId },
@@ -65,8 +65,15 @@ export const getServerSideProps = async (context: any) => {
     };
   }
 
-  const userId = (session.user as CustomUser).id;
-
+  let userId: string;
+  let isPublic: boolean;
+  if (session) {
+    userId = (session.user as CustomUser).id;
+    isPublic = false;
+  } else {
+    userId = `viewer-${(Math.random() + 1).toString(36).substring(2)}`;
+    isPublic = true;
+  }
   // create or fetch threadId
   const res = await fetch(
     `${process.env.NEXTAUTH_URL}/api/assistants/threads`,
@@ -78,6 +85,7 @@ export const getServerSideProps = async (context: any) => {
       body: JSON.stringify({
         documentId: link!.document!.id,
         userId: userId,
+        isPublic: true
       }),
     },
   );
@@ -103,6 +111,7 @@ export const getServerSideProps = async (context: any) => {
       messages: messages || [],
       firstPage,
       userId: userId,
+      isPublic: isPublic,
       linkId: linkId,
     },
   };
@@ -113,12 +122,14 @@ export default function ChatPage({
   messages,
   firstPage,
   userId,
+  isPublic,
   linkId,
 }: {
   threadId: string;
   messages: Message[];
   firstPage: string;
-  userId: string;
+  userId?: string;
+  isPublic: boolean;
   linkId: string;
 }) {
   const { plan } = usePlan();
@@ -136,6 +147,7 @@ export default function ChatPage({
         threadId={threadId}
         firstPage={firstPage}
         userId={userId}
+        isPublic={isPublic}
         plan={plan}
       />
     </>

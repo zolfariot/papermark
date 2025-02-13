@@ -12,9 +12,10 @@ export default async function handle(
   if (req.method === "POST") {
     // TODO: block unauthorized requests
 
-    const { documentId, userId } = req.body as {
+    const { documentId, userId, isPublic } = req.body as {
       documentId: string;
       userId: string;
+      isPublic: boolean;
     };
 
     try {
@@ -63,16 +64,24 @@ export default async function handle(
           })
         ).id;
 
-        conversation = await prisma.conversation.create({
-          data: {
-            userId,
-            threadId,
-            documentId,
-          },
-          select: {
-            threadId: true,
-          },
-        });
+	if (!isPublic) {
+          conversation = await prisma.conversation.create({
+            data: {
+              userId,
+              threadId,
+              documentId,
+            },
+            select: {
+              threadId: true,
+            },
+          });
+        } else {
+	  conversation = {
+	    userId: userId,
+	    threadId: threadId,
+	    documentId: documentId
+	  };
+	}
       }
 
       const threadId = conversation.threadId;
