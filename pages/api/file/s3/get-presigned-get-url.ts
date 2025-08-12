@@ -55,6 +55,7 @@ export default async function handler(
     const { client, config } = await getTeamS3ClientAndConfig(teamId);
 
     if (config.distributionHost) {
+      console.log('Getting presigned cloudfront');
       const distributionUrl = new URL(
         key,
         `https://${config.distributionHost}`,
@@ -75,9 +76,12 @@ export default async function handler(
       Key: key,
     });
 
+    console.log('Getting presigned url...');
     const url = await getS3SignedUrl(client, getObjectCommand, {
       expiresIn: ONE_HOUR / ONE_SECOND,
     });
+
+    console.log(`Using url: ${url}`);
 
     return res.status(200).json({ url });
   } catch (error) {
@@ -87,6 +91,6 @@ export default async function handler(
     });
     return res
       .status(500)
-      .json({ error: "AWS Cloudfront Signed URL Error", message: error });
+      .json({ error: "AWS Cloudfront Signed URL Error", message: error.message });
   }
 }

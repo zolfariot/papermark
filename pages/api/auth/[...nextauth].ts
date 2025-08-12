@@ -15,7 +15,7 @@ import { CreateUserEmailProps, CustomUser } from "@/lib/types";
 import { subscribe } from "@/lib/unsend";
 import { generateChecksum } from "@/lib/utils/generate-checksum";
 
-const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+const VERCEL_DEPLOYMENT = (!!process.env.VERCEL_URL || !!process.env.NEXT_PUBLIC_BASE_URL);
 
 function getMainDomainUrl(): string {
   if (process.env.NODE_ENV === "development") {
@@ -116,7 +116,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
-        domain: VERCEL_DEPLOYMENT ? ".papermark.com" : undefined,
+        domain: VERCEL_DEPLOYMENT ? (process.env.NEXT_PUBLIC_APP_BASE_HOST || ".papermark.com") : undefined,
         secure: VERCEL_DEPLOYMENT,
       },
     },

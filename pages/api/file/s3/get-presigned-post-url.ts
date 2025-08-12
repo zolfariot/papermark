@@ -71,6 +71,6 @@ export default async function handler(
 
     return res.status(200).json({ url, key, docId, fileName: slugifiedName });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error", message: error.message });
   }
 }
